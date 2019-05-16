@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Reactive.Linq;
 using Android.App;
 using Android.Content;
@@ -90,6 +91,7 @@ namespace Plugin.SpeechRecognition
             var currentIndex = 0;
             var speechRecognizer = SpeechRecognizer.CreateSpeechRecognizer(Application.Context);
             var listener = new SpeechRecognitionListener();
+            string lastsentence = string.Empty;
 
             listener.ReadyForSpeech = () => this.ListenSubject.OnNext(true);
             listener.PartialResults = sentence =>
@@ -97,12 +99,32 @@ namespace Plugin.SpeechRecognition
                 lock (this.syncLock)
                 {
                     sentence = sentence.Trim();
-                    if (currentIndex > sentence.Length)
-                        currentIndex = 0;
+                    if (sentence.Length > 0)
+                    {
+                        if (!string.IsNullOrEmpty(lastsentence) && sentence.IndexOf(lastsentence) == 0)
+                            currentIndex = lastsentence.Length;
+                        else if (!string.IsNullOrEmpty(lastsentence) && lastsentence.IndexOf(sentence) == 0)
+                            return; // in this case we ignore the sentence
+                        else if (currentIndex > sentence.Length)
+                        {
+                            currentIndex = 0;
+                            lastsentence = string.Empty;
+                        }
 
-                    var newPart = sentence.Substring(currentIndex);
-                    currentIndex = sentence.Length;
-                    ob.OnNext(newPart);
+                        lastsentence = sentence;
+
+                        var newPart = sentence.Substring(currentIndex).Trim();
+                        currentIndex = sentence.Length;
+                        foreach (var part in newPart.Split(' '))
+                        {
+                            var trimpart = part.Trim();
+                            if(trimpart.Length > 0)
+                            {
+                                Debug.WriteLine("filtered: " + trimpart);
+                                ob.OnNext(trimpart);
+                            }
+                        }
+                    }
                 }
             };
 

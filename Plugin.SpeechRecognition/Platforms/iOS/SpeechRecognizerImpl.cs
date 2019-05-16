@@ -17,7 +17,6 @@ namespace Plugin.SpeechRecognition
 
         public SpeechRecognizerImpl(IPermissions permissions = null) => this.permissions = permissions ?? CrossPermissions.Current;
 
-
         public override bool IsSupported => UIDevice.CurrentDevice.CheckSystemVersion(10, 0);
         public override IObservable<string> ListenUntilPause() => this.Listen(true);
         public override IObservable<string> ContinuousDictation() => this.Listen(false);
@@ -58,7 +57,10 @@ namespace Plugin.SpeechRecognition
             var format = audioEngine.InputNode.GetBusOutputFormat(0);
 
             if (!completeOnEndOfSpeech)
+            {
                 speechRequest.TaskHint = SFSpeechRecognitionTaskHint.Dictation;
+                audioEngine.AutoShutdownEnabled = false;
+            }
 
             audioEngine.InputNode.InstallTapOnBus(
                 0,

@@ -20,7 +20,7 @@ namespace Plugin.SpeechRecognition
 
         public void OnBeginningOfSpeech()
         {
-            Debug.WriteLine("Beginning of Speech");
+            //Debug.WriteLine("Beginning of Speech");
             this.StartOfSpeech?.Invoke();
         }
 
@@ -30,7 +30,7 @@ namespace Plugin.SpeechRecognition
 
         public void OnEndOfSpeech()
         {
-            Debug.WriteLine("End of Speech");
+            //Debug.WriteLine("End of Speech");
             this.EndOfSpeech?.Invoke();
         }
 
@@ -47,28 +47,28 @@ namespace Plugin.SpeechRecognition
 
         public void OnReadyForSpeech(Bundle @params)
         {
-            Debug.WriteLine("Ready for Speech");
+            //Debug.WriteLine("Ready for Speech");
             this.ReadyForSpeech?.Invoke();
         }
 
 
         public void OnPartialResults(Bundle bundle)
         {
-            Debug.WriteLine("OnPartialResults");
+            //Debug.WriteLine("OnPartialResults");
             this.SendResults(bundle, this.PartialResults);
         }
 
 
         public void OnResults(Bundle bundle)
         {
-            Debug.WriteLine("Speech Results");
+            //Debug.WriteLine("Speech Results");
             this.SendResults(bundle, this.FinalResults);
         }
 
 
         public void OnRmsChanged(float rmsdB)
         {
-            Debug.WriteLine("RMS Changed: " + rmsdB);
+            //Debug.WriteLine("RMS Changed: " + rmsdB);
             this.RmsChanged?.Invoke(rmsdB);
         }
 
@@ -81,10 +81,15 @@ namespace Plugin.SpeechRecognition
                 Debug.WriteLine("Matches value is null in bundle");
                 return;
             }
+            foreach (var item in matches)
+            {
+                Debug.WriteLine("match: " + item);
+            }
 
             if (Build.VERSION.SdkInt >= BuildVersionCodes.IceCreamSandwich && matches.Count > 1)
             {
                 var scores = bundle.GetFloatArray(SpeechRecognizer.ConfidenceScores);
+                //Debug.WriteLine(scores);
                 var best = 0;
                 for (var i = 0; i < scores.Length; i++)
                 {
